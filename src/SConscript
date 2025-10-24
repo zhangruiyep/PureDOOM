@@ -1,0 +1,19 @@
+from building import *
+import rtconfig
+import os
+
+src = []
+inc = []
+cwd = GetCurrentDir() # get current dir path
+
+src=Glob('*.c')+Glob('*.cpp')
+inc+=[cwd]
+inc+=[cwd+'/DOOM']
+inc+=[cwd+'/..']
+
+group = DefineGroup('PureDOOM', src, depend = [''], CPPPATH = inc)
+for d in os.listdir(cwd):
+    path = os.path.join(cwd, d)
+    if os.path.isfile(os.path.join(path, 'SConscript')):
+        group = group + SConscript(os.path.join(d, 'SConscript'))
+Return('group')

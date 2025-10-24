@@ -1,0 +1,10 @@
+import os
+from building import *
+
+cwd = GetCurrentDir()
+objs = []
+
+objs = Glob('*.cpp') + Glob('*.c')
+group = DefineGroup('PureDOOM', objs, depend = [''], CPPPATH = [cwd])
+
+Return('group')
