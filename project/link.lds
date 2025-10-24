@@ -480,7 +480,7 @@ SECTIONS
     *(.*l2_non_ret_bss_*)
     *(.*l2_cache_non_ret_data_*)
     *(.*l2_cache_non_ret_bss_*)
-    *.o(.bss.*)
+    *i_sound.o  (.bss.vol_lookup)
     . = ALIGN(4);
     __RW_PSRAM_NON_RET_end__ = .;
 

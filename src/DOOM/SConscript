@@ -3,8 +3,14 @@ from building import *
 
 cwd = GetCurrentDir()
 objs = []
+cppdefines = ['DOOM_IMPLEMENT_PRINT',
+              'DOOM_IMPLEMENT_MALLOC',
+              'DOOM_IMPLEMENT_FILE_IO',
+              'DOOM_IMPLEMENT_GETTIME',
+              'DOOM_IMPLEMENT_EXIT',
+              'DOOM_IMPLEMENT_GETENV']
 
 objs = Glob('*.cpp') + Glob('*.c')
-group = DefineGroup('PureDOOM', objs, depend = [''], CPPPATH = [cwd])
+group = DefineGroup('PureDOOM', objs, depend = [''], CPPPATH = [cwd], CPPDEFINES = cppdefines)
 
 Return('group')

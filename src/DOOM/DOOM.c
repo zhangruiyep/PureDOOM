@@ -106,7 +106,7 @@ int doom_tell_impl(void* handle)
 }
 int doom_eof_impl(void* handle)
 {
-    return feof(handle);
+    return feof((FILE *)handle);
 }
 #else
 void* doom_open_impl(const char* filename, const char* mode)
@@ -599,12 +599,12 @@ const unsigned char* doom_get_framebuffer(int channels)
     doom_memcpy(screen_buffer, screens[0], SCREENWIDTH * SCREENHEIGHT);
 
     extern doom_boolean menuactive;
-    extern gamestate_t gamestate; 
+    extern gamestate_t gamestate;
     extern doom_boolean automapactive;
     extern int crosshair;
 
     // Draw crosshair
-    if (crosshair && 
+    if (crosshair &&
         !menuactive &&
         gamestate == GS_LEVEL &&
         !automapactive)
