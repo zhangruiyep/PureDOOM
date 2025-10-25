@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id:$
@@ -547,7 +547,7 @@ void IdentifyVersion(void)
     char* doomwaddir;
     doomwaddir = doom_getenv("DOOMWADDIR");
     if (!doomwaddir)
-        doomwaddir = ".";
+        doomwaddir = "";   //".";
 
     // Commercial.
     doom2wad = doom_malloc(doom_strlen(doomwaddir) + 1 + 9 + 1);
@@ -1096,7 +1096,7 @@ void D_DoomMain(void)
                     "version. Register!");
 
         // Check for fake IWAD with right name,
-        // but w/o all the lumps of the registered version. 
+        // but w/o all the lumps of the registered version.
         if (gamemode == registered)
             for (i = 0; i < 23; i++)
                 if (W_CheckNumForName(name[i]) < 0)
