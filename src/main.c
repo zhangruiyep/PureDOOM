@@ -4,7 +4,7 @@
 #include "doom_mem.h"
 #include "DOOM.h"
 
-char *argv[1] = {"main"};
+char *argv[2] = {"doom", "-shdev"};
 
 /**
   * @brief  Main program
@@ -18,7 +18,7 @@ int main(void)
 
     doom_set_malloc((doom_malloc_fn)doom_mem_malloc, (doom_free_fn)doom_mem_free);
 
-    doom_init(1, argv, DOOM_FLAG_MENU_DARKEN_BG);
+    doom_init(sizeof(argv)/sizeof(argv[0]), argv, DOOM_FLAG_MENU_DARKEN_BG);
 
     while (1)
     {

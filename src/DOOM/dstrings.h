@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id:$
@@ -38,15 +38,15 @@
 
 
 // Misc. other strings.
-#define SAVEGAMENAME "doomsav"
+#define SAVEGAMENAME "/doomsav/"
 
 //
 // File locations,
 //  relative to current position.
 // Path names are OS-sensitive.
 //
-#define DEVMAPS "devmaps"
-#define DEVDATA "devdata"
+#define DEVMAPS "/devmaps/"
+#define DEVDATA "/devdata/"
 
 // Not done in french?
 

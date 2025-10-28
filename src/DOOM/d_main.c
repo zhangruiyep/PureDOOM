@@ -26,6 +26,7 @@
 
 
 #include "doom_config.h"
+#include <stdio.h>
 
 #if defined(DOOM_WIN32)
 
@@ -515,6 +516,10 @@ void D_AddFile(char* file)
 {
     int numwadfiles;
     char* newfile;
+
+    char debug[32] = {};
+    sprintf(debug, "D_AddFile: %s", file);
+    doom_print(debug);
 
     for (numwadfiles = 0; wadfiles[numwadfiles]; numwadfiles++)
         ;
