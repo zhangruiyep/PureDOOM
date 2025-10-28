@@ -4,6 +4,9 @@
 #include "doom_mem.h"
 #include "DOOM.h"
 
+extern void doom_video_init(void);
+extern void doom_video_refresh(uint8_t *rgb888);
+
 char *argv[2] = {"doom", "-shdev"};
 
 /**
@@ -16,6 +19,8 @@ int main(void)
     rt_err_t ret = RT_EOK;
     rt_uint32_t ms;
 
+    doom_video_init();
+
     doom_set_malloc((doom_malloc_fn)doom_mem_malloc, (doom_free_fn)doom_mem_free);
 
     doom_init(sizeof(argv)/sizeof(argv[0]), argv, DOOM_FLAG_MENU_DARKEN_BG);
@@ -23,7 +28,9 @@ int main(void)
     while (1)
     {
         doom_update();
-        rt_thread_mdelay(1);
+        uint8_t* framebuffer = doom_get_framebuffer(3 /* RGB */);
+        doom_video_refresh(framebuffer);
+        //rt_thread_mdelay(1);
     }
     return RT_EOK;
 

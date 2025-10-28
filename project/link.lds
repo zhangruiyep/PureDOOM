@@ -481,6 +481,7 @@ SECTIONS
     *(.*l2_cache_non_ret_data_*)
     *(.*l2_cache_non_ret_bss_*)
     *i_sound.o  (.bss.vol_lookup)
+    *doom_video.o  (.bss.lcd_buffer)
     . = ALIGN(4);
     __RW_PSRAM_NON_RET_end__ = .;
 

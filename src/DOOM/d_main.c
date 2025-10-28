@@ -517,9 +517,11 @@ void D_AddFile(char* file)
     int numwadfiles;
     char* newfile;
 
+#if 0
     char debug[32] = {};
-    sprintf(debug, "D_AddFile: %s", file);
+    sprintf(debug, "D_AddFile: %s\n", file);
     doom_print(debug);
+#endif
 
     for (numwadfiles = 0; wadfiles[numwadfiles]; numwadfiles++)
         ;
