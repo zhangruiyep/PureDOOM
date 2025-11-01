@@ -101,11 +101,35 @@ void doom_video_refresh(uint8_t *rgb888)
         return;
     }
 
-    doom_rgb888_to_rgb565(rgb888, lcd_buffer);
+    if (16 == lcd_info.bits_per_pixel)
+    {
+        doom_rgb888_to_rgb565(rgb888, lcd_buffer);
+    }
+
+#if 0
+    // test
+    for (int i = 0; i < SCREENWIDTH * SCREENHEIGHT; i++)
+    {
+        rgb888[i * 3] = 0x00;
+        rgb888[i * 3 + 1] = 0x00;
+        rgb888[i * 3 + 2] = 0xFF;
+    }
+#endif
 
     //rt_kprintf("%s %d\n", __func__, __LINE__);
     int32_t dx = (LCD_HOR_RES_MAX - SCREENWIDTH) / 2;
     int32_t dy = (LCD_VER_RES_MAX - SCREENHEIGHT) / 2;
-    rt_graphix_ops(g_lcd_device)->draw_rect((const char *)lcd_buffer, dx, dy, dx + SCREENWIDTH - 1, dy + SCREENHEIGHT - 1);
+    if (16 == lcd_info.bits_per_pixel)
+    {
+        rt_graphix_ops(g_lcd_device)->draw_rect((const char *)lcd_buffer, dx, dy, dx + SCREENWIDTH - 1, dy + SCREENHEIGHT - 1);
+    }
+    else if (24 == lcd_info.bits_per_pixel)
+    {
+        rt_graphix_ops(g_lcd_device)->draw_rect((const char *)rgb888, dx, dy, dx + SCREENWIDTH - 1, dy + SCREENHEIGHT - 1);
+    }
+    else
+    {
+        rt_kprintf("%s %d: lcd bits_per_pixel %d not support\n", __func__, __LINE__, lcd_info.bits_per_pixel);
+    }
     //rt_kprintf("%s %d\n", __func__, __LINE__);
 }

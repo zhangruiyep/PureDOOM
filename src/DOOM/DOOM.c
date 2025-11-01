@@ -641,9 +641,16 @@ const unsigned char* doom_get_framebuffer(int channels)
         {
             int k = i * 3;
             int kpal = screen_buffer[i] * 3;
+#if 0
             final_screen_buffer[k + 0] = screen_palette[kpal + 0];
             final_screen_buffer[k + 1] = screen_palette[kpal + 1];
             final_screen_buffer[k + 2] = screen_palette[kpal + 2];
+#else
+            // swap red and blue for co5300 rgb888
+            final_screen_buffer[k + 2] = screen_palette[kpal + 0];
+            final_screen_buffer[k + 1] = screen_palette[kpal + 1];
+            final_screen_buffer[k + 0] = screen_palette[kpal + 2];
+#endif
         }
         return final_screen_buffer;
     }
