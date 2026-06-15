@@ -83,7 +83,8 @@ static void doom_rgb888_to_rgb565(uint8_t *rgb888, uint16_t *rgb565)
         uint8_t r = rgb888[i * 3];
         uint8_t g = rgb888[i * 3 + 1];
         uint8_t b = rgb888[i * 3 + 2];
-        rgb565[i] = (r >> 3) << 11 | (g >> 2) << 5 | (b >> 3);
+        // CO5300 LCD 默认 BGR565 格式: bits[15:11]=B, bits[10:5]=G, bits[4:0]=R
+        rgb565[i] = (b >> 3) << 11 | (g >> 2) << 5 | (r >> 3);
     }
 }
 
