@@ -31,7 +31,9 @@ typedef bool doom_boolean;
 #if !defined(false) && !defined(true)
 typedef enum
 {
-    false, true
+    false,
+    true,
+    DOOM_BOOL_FORCE32 = 0x7FFFFFFF  // force enum to 4 bytes, required by WAD binary structs
 } doom_boolean;
 #else
 typedef int doom_boolean;

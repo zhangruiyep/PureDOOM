@@ -1258,7 +1258,9 @@ typedef bool doom_boolean;
 #if !defined(false) && !defined(true)
 typedef enum
 {
-    false, true
+    false,
+    true,
+    DOOM_BOOL_FORCE32 = 0x7FFFFFFF  // force enum to 4 bytes, required by WAD binary structs
 } doom_boolean;
 #else
 typedef int doom_boolean;
@@ -1698,15 +1700,15 @@ typedef struct
 
 
 // Misc. other strings.
-#define SAVEGAMENAME "doomsav"
+#define SAVEGAMENAME "/doomsav/"
 
 //
 // File locations,
 //  relative to current position.
 // Path names are OS-sensitive.
 //
-#define DEVMAPS "devmaps"
-#define DEVDATA "devdata"
+#define DEVMAPS "/devmaps/"
+#define DEVDATA "/devdata/"
 
 // Not done in french?
 
@@ -7089,7 +7091,7 @@ int doom_tell_impl(void* handle)
 }
 int doom_eof_impl(void* handle)
 {
-    return feof(handle);
+    return feof((FILE *)handle);
 }
 #else
 void* doom_open_impl(const char* filename, const char* mode)
@@ -7588,12 +7590,12 @@ const unsigned char* doom_get_framebuffer(int channels)
     doom_memcpy(screen_buffer, screens[0], SCREENWIDTH * SCREENHEIGHT);
 
     extern doom_boolean menuactive;
-    extern gamestate_t gamestate; 
+    extern gamestate_t gamestate;
     extern doom_boolean automapactive;
     extern int crosshair;
 
     // Draw crosshair
-    if (crosshair && 
+    if (crosshair &&
         !menuactive &&
         gamestate == GS_LEVEL &&
         !automapactive)
@@ -7624,9 +7626,16 @@ const unsigned char* doom_get_framebuffer(int channels)
         {
             int k = i * 3;
             int kpal = screen_buffer[i] * 3;
+#if 0
             final_screen_buffer[k + 0] = screen_palette[kpal + 0];
             final_screen_buffer[k + 1] = screen_palette[kpal + 1];
             final_screen_buffer[k + 2] = screen_palette[kpal + 2];
+#else
+            // swap red and blue for co5300 rgb888
+            final_screen_buffer[k + 2] = screen_palette[kpal + 0];
+            final_screen_buffer[k + 1] = screen_palette[kpal + 1];
+            final_screen_buffer[k + 0] = screen_palette[kpal + 2];
+#endif
         }
         return final_screen_buffer;
     }
@@ -9615,7 +9624,7 @@ void IdentifyVersion(void)
     char* doomwaddir;
     doomwaddir = doom_getenv("DOOMWADDIR");
     if (!doomwaddir)
-        doomwaddir = ".";
+        doomwaddir = "";   //".";
 
     // Commercial.
     doom2wad = doom_malloc(doom_strlen(doomwaddir) + 1 + 9 + 1);
@@ -10164,7 +10173,7 @@ void D_DoomMain(void)
                     "version. Register!");
 
         // Check for fake IWAD with right name,
-        // but w/o all the lumps of the registered version. 
+        // but w/o all the lumps of the registered version.
         if (gamemode == registered)
             for (i = 0; i < 23; i++)
                 if (W_CheckNumForName(name[i]) < 0)

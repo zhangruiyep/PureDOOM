@@ -40,7 +40,6 @@ int main(void)
         doom_video_refresh(framebuffer);
         short* audio_buff = doom_get_sound_buffer();
         doom_audio_write(audio_buff, 2048);
-        //rt_thread_mdelay(1);
     }
 
     doom_audio_close();
