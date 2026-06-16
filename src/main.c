@@ -31,9 +31,7 @@ int main(void)
     while (1)
     {
         rt_uint32_t current = rt_tick_get();
-        int fps = 1000/(current - ms);
         ms = current;
-        rt_kprintf("fps: %d\n", fps);
 
         rt_uint32_t t0 = rt_tick_get();
         doom_update();
@@ -48,13 +46,14 @@ int main(void)
         doom_audio_write(audio_buff, 2048);
         rt_uint32_t t3 = rt_tick_get();
 
-        // Profile: print every 16 frames (~2 seconds)
-        static int profile_cnt = 0;
-        if (++profile_cnt == 16)
+        // Summary every 64 frames (FPS + profile)
+        static int summary_cnt = 0;
+        if (++summary_cnt == 64)
         {
-            profile_cnt = 0;
-            rt_kprintf("  [profile] doom_update:%dms  video_refresh:%dms  audio:%dms  total:%dms\n",
-                t1 - t0, t2 - t1, t3 - t2, t3 - t0);
+            summary_cnt = 0;
+            int fps = 1000 / (t3 - ms);
+            rt_kprintf("  fps:%d  [update:%dms  video:%dms  audio:%dms  total:%dms]\n",
+                fps, t1 - t0, t2 - t1, t3 - t2, t3 - t0);
         }
     }
 

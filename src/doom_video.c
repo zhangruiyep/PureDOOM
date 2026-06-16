@@ -86,17 +86,21 @@ void doom_video_init(void)
 
     rt_device_control(g_lcd_device, RTGRAPHIC_CTRL_SET_BUF_FORMAT, &cf);
 
-    // Fill entire LCD with black background
+    // Fill entire LCD with black background (batched rows to reduce draw_rect calls)
     {
         int full_w = lcd_info.width;
         int full_h = lcd_info.height;
-        int buf_pixels = full_w; // one row buffer
+        int rows_per_batch = 16;
+        int buf_pixels = full_w * rows_per_batch;
         uint16_t *black_buf = doom_mem_malloc(buf_pixels * 2);
         RT_ASSERT(black_buf);
         memset(black_buf, 0, buf_pixels * 2); // 0 = black in both RGB565 and BGR565
         rt_graphix_ops(g_lcd_device)->set_window(0, 0, full_w - 1, full_h - 1);
-        for (int y = 0; y < full_h; y++)
-            rt_graphix_ops(g_lcd_device)->draw_rect((const char *)black_buf, 0, y, full_w - 1, y);
+        for (int y = 0; y < full_h; y += rows_per_batch)
+        {
+            int rows = (full_h - y < rows_per_batch) ? full_h - y : rows_per_batch;
+            rt_graphix_ops(g_lcd_device)->draw_rect((const char *)black_buf, 0, y, full_w - 1, y + rows - 1);
+        }
         doom_mem_free(black_buf);
     }
 
