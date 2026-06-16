@@ -35,11 +35,27 @@ int main(void)
         ms = current;
         rt_kprintf("fps: %d\n", fps);
 
+        rt_uint32_t t0 = rt_tick_get();
         doom_update();
+        rt_uint32_t t1 = rt_tick_get();
+
         uint8_t* framebuffer = doom_get_framebuffer(3 /* RGB */);
+
         doom_video_refresh(framebuffer);
+        rt_uint32_t t2 = rt_tick_get();
+
         short* audio_buff = doom_get_sound_buffer();
         doom_audio_write(audio_buff, 2048);
+        rt_uint32_t t3 = rt_tick_get();
+
+        // Profile: print every 16 frames (~2 seconds)
+        static int profile_cnt = 0;
+        if (++profile_cnt == 16)
+        {
+            profile_cnt = 0;
+            rt_kprintf("  [profile] doom_update:%dms  video_refresh:%dms  audio:%dms  total:%dms\n",
+                t1 - t0, t2 - t1, t3 - t2, t3 - t0);
+        }
     }
 
     doom_audio_close();

@@ -108,27 +108,22 @@ void doom_video_refresh(uint8_t *rgb888)
         return;
     }
 
+    rt_uint32_t t_cvt = 0, t_xfer = 0;
+
     if (16 == lcd_info.bits_per_pixel)
     {
+        rt_uint32_t t0 = rt_tick_get();
         doom_rgb888_to_rgb565(rgb888, lcd_buffer);
+        t_cvt = rt_tick_get() - t0;
     }
 
-#if 0
-    // test
-    for (int i = 0; i < SCREENWIDTH * SCREENHEIGHT; i++)
-    {
-        rgb888[i * 3] = 0x00;
-        rgb888[i * 3 + 1] = 0x00;
-        rgb888[i * 3 + 2] = 0xFF;
-    }
-#endif
-
-    //rt_kprintf("%s %d\n", __func__, __LINE__);
     int32_t dx = (LCD_HOR_RES_MAX - SCREENWIDTH) / 2;
     int32_t dy = (LCD_VER_RES_MAX - SCREENHEIGHT) / 2;
     if (16 == lcd_info.bits_per_pixel)
     {
+        rt_uint32_t t0 = rt_tick_get();
         rt_graphix_ops(g_lcd_device)->draw_rect((const char *)lcd_buffer, dx, dy, dx + SCREENWIDTH - 1, dy + SCREENHEIGHT - 1);
+        t_xfer = rt_tick_get() - t0;
     }
     else if (24 == lcd_info.bits_per_pixel)
     {
@@ -138,5 +133,17 @@ void doom_video_refresh(uint8_t *rgb888)
     {
         rt_kprintf("%s %d: lcd bits_per_pixel %d not support\n", __func__, __LINE__, lcd_info.bits_per_pixel);
     }
-    //rt_kprintf("%s %d\n", __func__, __LINE__);
+
+    // Fine profile: conversion vs transfer
+    static int p_cnt = 0;
+    static rt_uint32_t p_cvt = 0;
+    static rt_uint32_t p_xfer = 0;
+    p_cvt += t_cvt;
+    p_xfer += t_xfer;
+    if (p_cnt == 0) { p_cvt = 0; p_xfer = 0; }
+    if (++p_cnt == 16)
+    {
+        p_cnt = 0;
+        rt_kprintf("  [video] 16f-cvt:%dms  xfer:%dms\n", p_cvt, p_xfer);
+    }
 }
