@@ -4,16 +4,42 @@
 #include "doomdef.h"
 #include "doom_mem.h"
 
+// DOOM 256-color palette (set up by I_SetPalette during init)
+extern unsigned char screen_palette[256 * 3];
+
+// Precomputed BGR565 lookup table: palette index → 16-bit BGR565
+static uint16_t pal_bgr565[256];
+static int pal_ready = 0;
+
 #define LOG_D rt_kprintf
 
 unsigned short lcd_buffer[ SCREENWIDTH * SCREENHEIGHT ] __attribute__ ((aligned (4)));
-//extern void start_application( void );
-//extern void close_application( void );
 
 unsigned int dwKeyPad1 = 0;
 
 static rt_device_t g_lcd_device = RT_NULL;
 static struct rt_device_graphic_info lcd_info;
+
+static void build_bgr565_palette(void)
+{
+    for (int i = 0; i < 256; i++)
+    {
+        uint8_t r = screen_palette[i * 3 + 0];
+        uint8_t g = screen_palette[i * 3 + 1];
+        uint8_t b = screen_palette[i * 3 + 2];
+        // CO5300 LCD 实际需要 RGB565 格式
+        pal_bgr565[i] = (r >> 3) << 11 | (g >> 2) << 5 | (b >> 3);
+    }
+    pal_ready = 1;
+}
+
+// Fast: palette indices → BGR565 via precomputed lookup table
+static void pal_to_bgr565(const unsigned char *indices, uint16_t *out)
+{
+    int n = SCREENWIDTH * SCREENHEIGHT;
+    for (int i = 0; i < n; i++)
+        out[i] = pal_bgr565[indices[i]];
+}
 
 static void set_brightness(rt_device_t lcd_device)
 {
@@ -82,20 +108,10 @@ void doom_video_init(void)
     //rt_device_close(g_lcd_device);
 }
 
-static void doom_rgb888_to_rgb565(uint8_t *rgb888, uint16_t *rgb565)
+void doom_video_refresh(const unsigned char *pal_indices)
 {
-    for (int i = 0; i < SCREENWIDTH * SCREENHEIGHT; i++)
-    {
-        uint8_t r = rgb888[i * 3];
-        uint8_t g = rgb888[i * 3 + 1];
-        uint8_t b = rgb888[i * 3 + 2];
-        // CO5300 LCD 默认 BGR565 格式: bits[15:11]=B, bits[10:5]=G, bits[4:0]=R
-        rgb565[i] = (b >> 3) << 11 | (g >> 2) << 5 | (r >> 3);
-    }
-}
+    if (!pal_ready) build_bgr565_palette();
 
-void doom_video_refresh(uint8_t *rgb888)
-{
     if (!g_lcd_device)
     {
         rt_kprintf("%s %d: no lcd dev\n", __func__, __LINE__);
@@ -108,42 +124,21 @@ void doom_video_refresh(uint8_t *rgb888)
         return;
     }
 
-    rt_uint32_t t_cvt = 0, t_xfer = 0;
-
-    if (16 == lcd_info.bits_per_pixel)
-    {
-        rt_uint32_t t0 = rt_tick_get();
-        doom_rgb888_to_rgb565(rgb888, lcd_buffer);
-        t_cvt = rt_tick_get() - t0;
-    }
+    // Direct palette → BGR565 (skips RGB888 intermediate)
+    pal_to_bgr565(pal_indices, lcd_buffer);
 
     int32_t dx = (LCD_HOR_RES_MAX - SCREENWIDTH) / 2;
     int32_t dy = (LCD_VER_RES_MAX - SCREENHEIGHT) / 2;
     if (16 == lcd_info.bits_per_pixel)
     {
-        rt_uint32_t t0 = rt_tick_get();
         rt_graphix_ops(g_lcd_device)->draw_rect((const char *)lcd_buffer, dx, dy, dx + SCREENWIDTH - 1, dy + SCREENHEIGHT - 1);
-        t_xfer = rt_tick_get() - t0;
     }
     else if (24 == lcd_info.bits_per_pixel)
     {
-        rt_graphix_ops(g_lcd_device)->draw_rect((const char *)rgb888, dx, dy, dx + SCREENWIDTH - 1, dy + SCREENHEIGHT - 1);
+        rt_graphix_ops(g_lcd_device)->draw_rect((const char *)pal_indices, dx, dy, dx + SCREENWIDTH - 1, dy + SCREENHEIGHT - 1);
     }
     else
     {
         rt_kprintf("%s %d: lcd bits_per_pixel %d not support\n", __func__, __LINE__, lcd_info.bits_per_pixel);
-    }
-
-    // Fine profile: conversion vs transfer
-    static int p_cnt = 0;
-    static rt_uint32_t p_cvt = 0;
-    static rt_uint32_t p_xfer = 0;
-    p_cvt += t_cvt;
-    p_xfer += t_xfer;
-    if (p_cnt == 0) { p_cvt = 0; p_xfer = 0; }
-    if (++p_cnt == 16)
-    {
-        p_cnt = 0;
-        rt_kprintf("  [video] 16f-cvt:%dms  xfer:%dms\n", p_cvt, p_xfer);
     }
 }

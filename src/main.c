@@ -6,7 +6,7 @@
 #include "DOOM.h"
 
 extern void doom_video_init(void);
-extern void doom_video_refresh(uint8_t *rgb888);
+extern void doom_video_refresh(const unsigned char *pal_indices);
 
 char *argv[2] = {"doom", "-shdev"};
 
@@ -39,7 +39,7 @@ int main(void)
         doom_update();
         rt_uint32_t t1 = rt_tick_get();
 
-        uint8_t* framebuffer = doom_get_framebuffer(3 /* RGB */);
+        const uint8_t* framebuffer = doom_get_framebuffer(1 /* palette indices */);
 
         doom_video_refresh(framebuffer);
         rt_uint32_t t2 = rt_tick_get();
