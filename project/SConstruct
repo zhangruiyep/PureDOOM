@@ -24,6 +24,9 @@ TARGET = rtconfig.OUTPUT_DIR + rtconfig.TARGET_NAME + '.' + rtconfig.TARGET_EXT
 objs = PrepareBuilding(None)
 env = GetCurrentEnv()
 
+# Override SDK's -Oz with -O2 for better runtime performance
+env.Append(CCFLAGS=['-O2'])
+
 # Build application.
 DoBuilding(TARGET, objs)
 

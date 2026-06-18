@@ -1038,7 +1038,7 @@ typedef enum
 
 // If rangecheck is undefined,
 // most parameter validation debugging code will not be compiled
-#define RANGECHECK
+// #define RANGECHECK  // disabled for embedded performance
 
 //
 // For resize of screen, at start of game.
